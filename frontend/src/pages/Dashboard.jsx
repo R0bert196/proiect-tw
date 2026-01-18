@@ -16,6 +16,7 @@ function Dashboard() {
 
   const addTask = async (e) => {
     e.preventDefault();
+    if (!title.trim()) return;
     const res = await API.post("/tasks", { title });
     setTasks([...tasks, res.data]);
     setTitle("");
@@ -34,31 +35,43 @@ function Dashboard() {
   };
 
   return (
-    <div>
-      <h2>My Tasks</h2>
+    <div className="max-w-3xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-4 text-blue-600">My Tasks</h2>
 
-      <form onSubmit={addTask}>
+      <form onSubmit={addTask} className="flex gap-2 mb-6">
         <input
-          placeholder="New task"
+          className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="What do you need to do?"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <button>Add</button>
+        <button className="bg-blue-600 text-white px-5 rounded-lg hover:bg-blue-700 transition">
+          Add
+        </button>
       </form>
 
-      <ul>
+      <ul className="space-y-3">
         {tasks.map((task) => (
-          <li key={task.id}>
+          <li
+            key={task.id}
+            className="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg shadow-sm"
+          >
             <span
               onClick={() => toggleTask(task)}
-              style={{
-                textDecoration: task.completed ? "line-through" : "none",
-                cursor: "pointer",
-              }}
+              className={`cursor-pointer ${
+                task.completed
+                  ? "line-through text-gray-400"
+                  : "text-gray-800"
+              }`}
             >
               {task.title}
             </span>
-            <button onClick={() => deleteTask(task.id)}>❌</button>
+            <button
+              onClick={() => deleteTask(task.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ✕
+            </button>
           </li>
         ))}
       </ul>

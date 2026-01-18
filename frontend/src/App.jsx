@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/Navbar";
+import React from "react";
 import { isAuthenticated } from "./utils/auth";
 
 function PrivateRoute({ children }) {

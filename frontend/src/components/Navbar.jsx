@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated, logout } from "../utils/auth";
 
@@ -10,11 +11,32 @@ function Navbar() {
   };
 
   return (
-    <nav style={{ padding: 10, background: "#eee" }}>
-      <Link to="/">Dashboard</Link>{" "}
-      {!isAuthenticated() && <Link to="/login">Login</Link>}{" "}
-      {!isAuthenticated() && <Link to="/register">Register</Link>}
-      {isAuthenticated() && <button onClick={handleLogout}>Logout</button>}
+    <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+      <Link to="/" className="text-xl font-bold text-blue-600">
+        TaskFlow
+      </Link>
+
+      <div className="space-x-4">
+        {!isAuthenticated() && (
+          <>
+            <Link to="/login" className="text-gray-600 hover:text-blue-600">
+              Login
+            </Link>
+            <Link to="/register" className="text-gray-600 hover:text-blue-600">
+              Register
+            </Link>
+          </>
+        )}
+
+        {isAuthenticated() && (
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        )}
+      </div>
     </nav>
   );
 }
