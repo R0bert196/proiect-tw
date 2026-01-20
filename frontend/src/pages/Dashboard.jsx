@@ -3,27 +3,23 @@ import API from "../api/api";
 
 export default function Dashboard() {
   const [notes, setNotes] = useState([]);
-  const [newTitle, setNewTitle] = useState("");
-  const [newContent, setNewContent] = useState("");
+  const [repos, setRepos] = useState([]);
+  const [selectedRepoId, setSelectedRepoId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
-  const [editingRepoId, setEditingRepoId] = useState(null); // pentru edit
-  const [repos, setRepos] = useState([]);
-  const [selectedRepoId, setSelectedRepoId] = useState(null);
+  const [editingRepoId, setEditingRepoId] = useState(null);
+
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+
   const [newRepoName, setNewRepoName] = useState("");
   const [newRepoLink, setNewRepoLink] = useState("");
+  const [editingRepoItemId, setEditingRepoItemId] = useState(null);
+  const [editingRepoName, setEditingRepoName] = useState("");
+  const [editingRepoLink, setEditingRepoLink] = useState("");
 
-  const addRepo = async () => {
-    if (!newRepoName || !newRepoLink)
-      return alert("Numele și link-ul repo-ului sunt necesare");
-
-    await API.post("/repos", { name: newRepoName, url: newRepoLink });
-    setNewRepoName("");
-    setNewRepoLink("");
-    fetchRepos();
-  };
-
+  // --- Notes ---
   const fetchNotes = async () => {
     try {
       const res = await API.get("/notes");
@@ -31,11 +27,6 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Error fetching notes:", err);
     }
-  };
-
-  const fetchRepos = async () => {
-    const res = await API.get("/repos");
-    setRepos(res.data);
   };
 
   const addNote = async () => {
@@ -47,7 +38,6 @@ export default function Dashboard() {
       content: newContent,
       repoId: selectedRepoId,
     });
-
     setNewTitle("");
     setNewContent("");
     setSelectedRepoId(null);
@@ -55,53 +45,90 @@ export default function Dashboard() {
   };
 
   const deleteNote = async (id) => {
-    try {
-      await API.delete(`/notes/${id}`);
-      fetchNotes();
-    } catch (err) {
-      console.error("Error deleting note:", err);
-    }
+    await API.delete(`/notes/${id}`);
+    fetchNotes();
   };
 
-  const startEditing = (note) => {
+  const startEditingNote = (note) => {
     setEditingId(note.id);
     setEditingTitle(note.title);
     setEditingContent(note.content);
-    setEditingRepoId(note.repoId || ""); // repo asociat
+    setEditingRepoId(note.repoId || "");
   };
 
-  const cancelEditing = () => {
+  const cancelEditingNote = () => {
     setEditingId(null);
     setEditingTitle("");
     setEditingContent("");
     setEditingRepoId(null);
   };
 
-  const saveEditing = async (id) => {
-    if (!editingTitle || !editingContent) {
+  const saveEditingNote = async (id) => {
+    if (!editingTitle || !editingContent)
       return alert("Titlu și conținut necesare");
-    }
-    try {
-      await API.put(`/notes/${id}`, {
-        title: editingTitle,
-        content: editingContent,
-        repoId: editingRepoId || null,
-      });
-      cancelEditing();
-      fetchNotes();
-    } catch (err) {
-      console.error("Error saving note:", err);
-    }
+
+    await API.put(`/notes/${id}`, {
+      title: editingTitle,
+      content: editingContent,
+      repoId: editingRepoId || null,
+    });
+    cancelEditingNote();
+    fetchNotes();
+  };
+
+  // --- Repos ---
+  const fetchRepos = async () => {
+    const res = await API.get("/repos");
+    setRepos(res.data);
+  };
+
+  const addRepo = async () => {
+    if (!newRepoName || !newRepoLink) return alert("Nume și link necesare");
+
+    await API.post("/repos", { name: newRepoName, url: newRepoLink });
+    setNewRepoName("");
+    setNewRepoLink("");
+    fetchRepos();
+  };
+
+  const startEditingRepo = (repo) => {
+    setEditingRepoItemId(repo.id);
+    setEditingRepoName(repo.name);
+    setEditingRepoLink(repo.url);
+  };
+
+  const cancelEditingRepo = () => {
+    setEditingRepoItemId(null);
+    setEditingRepoName("");
+    setEditingRepoLink("");
+  };
+
+  const saveEditingRepo = async (id) => {
+    if (!editingRepoName || !editingRepoLink)
+      return alert("Nume și link necesare");
+
+    await API.put(`/repos/${id}`, {
+      name: editingRepoName,
+      url: editingRepoLink,
+    });
+    cancelEditingRepo();
+    fetchRepos();
+  };
+
+  const deleteRepo = async (id) => {
+    await API.delete(`/repos/${id}`);
+    fetchRepos();
   };
 
   useEffect(() => {
-    fetchRepos();
     fetchNotes();
+    fetchRepos();
   }, []);
 
   return (
     <div className='p-6 max-w-xl mx-auto'>
-      {/* Add new Repo */}
+      {/* --- Repos Section --- */}
+      <h2 className='text-lg font-bold mb-2'>GitHub Repos</h2>
       <div className='flex mb-4 space-x-2'>
         <input
           type='text'
@@ -124,8 +151,64 @@ export default function Dashboard() {
           Add Repo
         </button>
       </div>
+      <ul className='mb-6'>
+        {repos.map((repo) =>
+          editingRepoItemId === repo.id ? (
+            <li key={repo.id} className='flex items-center space-x-2 mb-2'>
+              <input
+                type='text'
+                value={editingRepoName}
+                onChange={(e) => setEditingRepoName(e.target.value)}
+                className='border px-2 py-1 flex-1 rounded'
+              />
+              <input
+                type='text'
+                value={editingRepoLink}
+                onChange={(e) => setEditingRepoLink(e.target.value)}
+                className='border px-2 py-1 flex-2 rounded'
+              />
+              <button
+                onClick={() => saveEditingRepo(repo.id)}
+                className='bg-green-500 text-white px-2 rounded hover:bg-green-600'
+              >
+                Save
+              </button>
+              <button
+                onClick={cancelEditingRepo}
+                className='bg-gray-300 px-2 rounded hover:bg-gray-400'
+              >
+                Cancel
+              </button>
+            </li>
+          ) : (
+            <li
+              key={repo.id}
+              className='flex justify-between items-center mb-2'
+            >
+              <div>
+                <strong>{repo.name}</strong> ({repo.url})
+              </div>
+              <div className='space-x-2'>
+                <button
+                  onClick={() => startEditingRepo(repo)}
+                  className='text-yellow-500 hover:text-yellow-700'
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteRepo(repo.id)}
+                  className='text-red-500 hover:text-red-700'
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          )
+        )}
+      </ul>
 
-      {/* Add new note */}
+      {/* --- Notes Section --- */}
+      <h2 className='text-lg font-bold mb-2'>Notes</h2>
       <div className='flex mb-4 space-x-2'>
         <input
           type='text'
@@ -161,10 +244,9 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Notes list */}
       <ul>
         {notes.map((note) => {
-          const repoName = note.repo?.name || ""; // presupunem că backend trimite repo inclus
+          const repoName = note.repo?.name || "";
           return (
             <li
               key={note.id}
@@ -197,13 +279,13 @@ export default function Dashboard() {
                     ))}
                   </select>
                   <button
-                    onClick={() => saveEditing(note.id)}
+                    onClick={() => saveEditingNote(note.id)}
                     className='bg-green-500 text-white px-2 rounded hover:bg-green-600'
                   >
                     Save
                   </button>
                   <button
-                    onClick={cancelEditing}
+                    onClick={cancelEditingNote}
                     className='bg-gray-300 px-2 rounded hover:bg-gray-400'
                   >
                     Cancel
@@ -221,7 +303,7 @@ export default function Dashboard() {
                   </div>
                   <div className='space-x-2'>
                     <button
-                      onClick={() => startEditing(note)}
+                      onClick={() => startEditingNote(note)}
                       className='text-yellow-500 hover:text-yellow-700'
                     >
                       Edit
