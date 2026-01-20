@@ -16,14 +16,24 @@ router.get("/", authMiddleware, async (req, res) => {
 
 // Create note
 router.post("/", authMiddleware, async (req, res) => {
-  const { title, content } = req.body;
+  const { title, content, repoId } = req.body;
   if (!title || !content)
-    return res.status(400).json({ message: "Titlu și conținut necesare" });
+    return res.status(400).json({ message: "Titlu și conținut sunt necesare" });
 
-  const note = await prisma.note.create({
-    data: { title, content, userId: req.user.id },
-  });
-  res.json(note);
+  try {
+    const note = await prisma.note.create({
+      data: {
+        title,
+        content,
+        userId: req.user.id,
+        repoId: repoId || null, // poate fi null dacă nu selectezi repo
+      },
+    });
+    res.json(note);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Eroare la crearea notei" });
+  }
 });
 
 // Update note
