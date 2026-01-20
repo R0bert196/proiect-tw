@@ -23,6 +23,7 @@ router.get("/", authMiddleware, async (req, res) => {
 // Create task
 router.post("/", authMiddleware, async (req, res) => {
   const { title } = req.body;
+  if (!title) return res.status(400).json({ message: "Titlul este necesar" });
   const task = await prisma.task.create({
     data: { title, userId: req.user.id },
   });
@@ -33,6 +34,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { title, completed } = req.body;
+  if (!title) return res.status(400).json({ message: "Titlul este necesar" });
   const task = await prisma.task.update({
     where: { id: Number(id) },
     data: { title, completed },
