@@ -12,43 +12,44 @@ function Register() {
     e.preventDefault();
     try {
       await API.post("/auth/register", { email, password });
+      alert("✅ Contul a fost creat cu succes! Te redirecționăm către login.");
       navigate("/login");
-    } catch {
-      alert("Register failed");
+    } catch (err) {
+      alert(err.response?.data?.message || "Register failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-200">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-indigo-600">
+    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-200'>
+      <div className='bg-white p-8 rounded-xl shadow-lg w-full max-w-md'>
+        <h2 className='text-2xl font-bold mb-6 text-center text-indigo-600'>
           Create Account
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className='space-y-4'>
           <input
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            placeholder="Email"
+            className='w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400'
+            placeholder='Email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
           <input
-            type="password"
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            placeholder="Password"
+            type='password'
+            className='w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400'
+            placeholder='Password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+          <button className='w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition'>
             Register
           </button>
         </form>
 
-        <p className="text-sm text-center mt-4 text-gray-600">
+        <p className='text-sm text-center mt-4 text-gray-600'>
           Already have an account?{" "}
-          <Link to="/login" className="text-indigo-600 hover:underline">
+          <Link to='/login' className='text-indigo-600 hover:underline'>
             Login
           </Link>
         </p>
