@@ -6,12 +6,13 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Task" (
+CREATE TABLE "Note" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
     "completed" BOOLEAN NOT NULL DEFAULT false,
     "userId" INTEGER NOT NULL,
-    CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Note_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
