@@ -8,6 +8,20 @@ export default function Dashboard() {
   const [editingId, setEditingId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
+  const [repos, setRepos] = useState([]);
+  const [selectedRepoId, setSelectedRepoId] = useState(null);
+  const [newRepoName, setNewRepoName] = useState("");
+  const [newRepoLink, setNewRepoLink] = useState("");
+
+  const addRepo = async () => {
+    if (!newRepoName || !newRepoLink)
+      return alert("Numele și link-ul repo-ului sunt necesare");
+
+    await API.post("/repos", { name: newRepoName, url: newRepoLink });
+    setNewRepoName("");
+    setNewRepoLink("");
+    fetchRepos(); // reîncarcă lista pentru dropdown
+  };
 
   // Fetch notes from backend
   const fetchNotes = async () => {
@@ -19,19 +33,26 @@ export default function Dashboard() {
     }
   };
 
-  // Add new note
+  // Fetch all GitHub repos
+  const fetchRepos = async () => {
+    const res = await API.get("/repos");
+    setRepos(res.data);
+  };
+
   const addNote = async () => {
-    if (!newTitle || !newContent) {
-      return alert("Titlu și conținut necesare");
-    }
-    try {
-      await API.post("/notes", { title: newTitle, content: newContent });
-      setNewTitle("");
-      setNewContent("");
-      fetchNotes();
-    } catch (err) {
-      console.error("Error adding note:", err);
-    }
+    if (!newTitle || !newContent)
+      return alert("Titlu și conținut sunt necesare");
+
+    await API.post("/notes", {
+      title: newTitle,
+      content: newContent,
+      repoId: selectedRepoId, // trimite id-ul repo selectat
+    });
+
+    setNewTitle("");
+    setNewContent("");
+    setSelectedRepoId(null); // resetează dropdown-ul
+    fetchNotes();
   };
 
   // Delete note
@@ -76,11 +97,36 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    fetchRepos();
     fetchNotes();
   }, []);
 
   return (
     <div className='p-6 max-w-xl mx-auto'>
+      {/* Add new Repo  */}
+      <div className='flex mb-4 space-x-2'>
+        <input
+          type='text'
+          placeholder='Nume repo GitHub'
+          value={newRepoName}
+          onChange={(e) => setNewRepoName(e.target.value)}
+          className='border px-2 py-1 rounded flex-1'
+        />
+        <input
+          type='text'
+          placeholder='Link repo GitHub'
+          value={newRepoLink}
+          onChange={(e) => setNewRepoLink(e.target.value)}
+          className='border px-2 py-1 rounded flex-2'
+        />
+        <button
+          onClick={addRepo}
+          className='bg-green-500 text-white px-4 rounded hover:bg-green-600'
+        >
+          Add Repo
+        </button>
+      </div>
+
       {/* Add new note */}
       <div className='flex mb-4 space-x-2'>
         <input
@@ -97,6 +143,18 @@ export default function Dashboard() {
           onChange={(e) => setNewContent(e.target.value)}
           className='border px-2 py-1 rounded flex-2'
         />
+        <select
+          value={selectedRepoId || ""}
+          onChange={(e) => setSelectedRepoId(Number(e.target.value))}
+          className='border px-2 py-1 rounded'
+        >
+          <option value=''>Selectează tema GitHub</option>
+          {repos.map((repo) => (
+            <option key={repo.id} value={repo.id}>
+              {repo.name}
+            </option>
+          ))}
+        </select>
         <button
           onClick={addNote}
           className='bg-blue-500 text-white px-4 rounded hover:bg-blue-600'
