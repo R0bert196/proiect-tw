@@ -1,8 +1,7 @@
-import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated, logout } from "../utils/auth";
 
-function Navbar() {
+export default function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -12,19 +11,13 @@ function Navbar() {
 
   return (
     <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold text-blue-600">
-        TaskFlow
-      </Link>
+      <Link to="/" className="text-xl font-bold text-blue-600">TaskFlow</Link>
 
       <div className="space-x-4">
         {!isAuthenticated() && (
           <>
-            <Link to="/login" className="text-gray-600 hover:text-blue-600">
-              Login
-            </Link>
-            <Link to="/register" className="text-gray-600 hover:text-blue-600">
-              Register
-            </Link>
+            <Link to="/login" className="text-gray-600 hover:text-blue-600">Login</Link>
+            <Link to="/register" className="text-gray-600 hover:text-blue-600">Register</Link>
           </>
         )}
 
@@ -40,5 +33,3 @@ function Navbar() {
     </nav>
   );
 }
-
-export default Navbar;
