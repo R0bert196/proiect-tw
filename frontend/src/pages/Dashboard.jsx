@@ -2,102 +2,156 @@ import { useEffect, useState } from "react";
 import API from "../api/api";
 
 export default function Dashboard() {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState("");
+  const [notes, setNotes] = useState([]);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [editingContent, setEditingContent] = useState("");
 
-  const fetchTasks = async () => {
-    const res = await API.get("/tasks");
-    setTasks(res.data);
+  // Fetch notes from backend
+  const fetchNotes = async () => {
+    try {
+      const res = await API.get("/notes");
+      setNotes(res.data);
+    } catch (err) {
+      console.error("Error fetching notes:", err);
+    }
   };
 
-  const addTask = async () => {
-    if (!newTask) return;
-    await API.post("/tasks", { title: newTask });
-    setNewTask("");
-    fetchTasks();
+  // Add new note
+  const addNote = async () => {
+    if (!newTitle || !newContent) {
+      return alert("Titlu și conținut necesare");
+    }
+    try {
+      await API.post("/notes", { title: newTitle, content: newContent });
+      setNewTitle("");
+      setNewContent("");
+      fetchNotes();
+    } catch (err) {
+      console.error("Error adding note:", err);
+    }
   };
 
-  const toggleComplete = async (task) => {
-    await API.put(`/tasks/${task.id}`, { title: task.title, completed: !task.completed });
-    fetchTasks();
+  // Delete note
+  const deleteNote = async (id) => {
+    try {
+      await API.delete(`/notes/${id}`);
+      fetchNotes();
+    } catch (err) {
+      console.error("Error deleting note:", err);
+    }
   };
 
-  const deleteTask = async (id) => {
-    await API.delete(`/tasks/${id}`);
-    fetchTasks();
+  // Start editing note
+  const startEditing = (note) => {
+    setEditingId(note.id);
+    setEditingTitle(note.title);
+    setEditingContent(note.content);
   };
 
-  const startEditing = (task) => {
-    setEditingId(task.id);
-    setEditingTitle(task.title);
-  };
-
+  // Cancel editing
   const cancelEditing = () => {
     setEditingId(null);
     setEditingTitle("");
+    setEditingContent("");
   };
 
+  // Save edited note
   const saveEditing = async (id) => {
-    if (!editingTitle) return alert("Titlul este necesar");
-    await API.put(`/tasks/${id}`, { title: editingTitle, completed: tasks.find(t => t.id === id).completed });
-    cancelEditing();
-    fetchTasks();
+    if (!editingTitle || !editingContent) {
+      return alert("Titlu și conținut necesare");
+    }
+    try {
+      await API.put(`/notes/${id}`, {
+        title: editingTitle,
+        content: editingContent,
+      });
+      cancelEditing();
+      fetchNotes();
+    } catch (err) {
+      console.error("Error saving note:", err);
+    }
   };
 
   useEffect(() => {
-    fetchTasks();
+    fetchNotes();
   }, []);
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Your Tasks</h1>
-
-      <div className="flex mb-4">
+    <div className='p-6 max-w-xl mx-auto'>
+      {/* Add new note */}
+      <div className='flex mb-4 space-x-2'>
         <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          className="border px-2 py-1 flex-grow rounded-l"
-          placeholder="New task"
+          type='text'
+          placeholder='Titlu'
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          className='border px-2 py-1 rounded flex-1'
         />
-        <button onClick={addTask} className="bg-blue-500 text-white px-4 rounded-r hover:bg-blue-600">
+        <input
+          type='text'
+          placeholder='Conținut'
+          value={newContent}
+          onChange={(e) => setNewContent(e.target.value)}
+          className='border px-2 py-1 rounded flex-2'
+        />
+        <button
+          onClick={addNote}
+          className='bg-blue-500 text-white px-4 rounded hover:bg-blue-600'
+        >
           Add
         </button>
       </div>
 
+      {/* Notes list */}
       <ul>
-        {tasks.map((task) => (
-          <li key={task.id} className="flex items-center justify-between mb-2">
-            {editingId === task.id ? (
-              <div className="flex flex-grow items-center space-x-2">
+        {notes.map((note) => (
+          <li key={note.id} className='flex items-center justify-between mb-2'>
+            {editingId === note.id ? (
+              <div className='flex flex-grow items-center space-x-2'>
                 <input
-                  type="text"
+                  type='text'
                   value={editingTitle}
                   onChange={(e) => setEditingTitle(e.target.value)}
-                  className="border px-2 py-1 flex-grow rounded"
+                  className='border px-2 py-1 flex-1 rounded'
                 />
-                <button onClick={() => saveEditing(task.id)} className="bg-green-500 text-white px-2 rounded hover:bg-green-600">
+                <input
+                  type='text'
+                  value={editingContent}
+                  onChange={(e) => setEditingContent(e.target.value)}
+                  className='border px-2 py-1 flex-2 rounded'
+                />
+                <button
+                  onClick={() => saveEditing(note.id)}
+                  className='bg-green-500 text-white px-2 rounded hover:bg-green-600'
+                >
                   Save
                 </button>
-                <button onClick={cancelEditing} className="bg-gray-300 px-2 rounded hover:bg-gray-400">
+                <button
+                  onClick={cancelEditing}
+                  className='bg-gray-300 px-2 rounded hover:bg-gray-400'
+                >
                   Cancel
                 </button>
               </div>
             ) : (
               <>
-                <span
-                  onClick={() => toggleComplete(task)}
-                  className={`cursor-pointer flex-grow ${task.completed ? "line-through text-gray-400" : ""}`}
-                >
-                  {task.title}
-                </span>
-                <div className="space-x-2">
-                  <button onClick={() => startEditing(task)} className="text-yellow-500 hover:text-yellow-700">
+                <div className='flex-grow'>
+                  <strong>{note.title}</strong>: {note.content}
+                </div>
+                <div className='space-x-2'>
+                  <button
+                    onClick={() => startEditing(note)}
+                    className='text-yellow-500 hover:text-yellow-700'
+                  >
                     Edit
                   </button>
-                  <button onClick={() => deleteTask(task.id)} className="text-red-500 hover:text-red-700">
+                  <button
+                    onClick={() => deleteNote(note.id)}
+                    className='text-red-500 hover:text-red-700'
+                  >
                     Delete
                   </button>
                 </div>
