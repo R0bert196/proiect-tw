@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [editingId, setEditingId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
+  const [editingRepoId, setEditingRepoId] = useState(null); // pentru edit
   const [repos, setRepos] = useState([]);
   const [selectedRepoId, setSelectedRepoId] = useState(null);
   const [newRepoName, setNewRepoName] = useState("");
@@ -20,10 +21,9 @@ export default function Dashboard() {
     await API.post("/repos", { name: newRepoName, url: newRepoLink });
     setNewRepoName("");
     setNewRepoLink("");
-    fetchRepos(); // reîncarcă lista pentru dropdown
+    fetchRepos();
   };
 
-  // Fetch notes from backend
   const fetchNotes = async () => {
     try {
       const res = await API.get("/notes");
@@ -33,7 +33,6 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch all GitHub repos
   const fetchRepos = async () => {
     const res = await API.get("/repos");
     setRepos(res.data);
@@ -46,16 +45,15 @@ export default function Dashboard() {
     await API.post("/notes", {
       title: newTitle,
       content: newContent,
-      repoId: selectedRepoId, // trimite id-ul repo selectat
+      repoId: selectedRepoId,
     });
 
     setNewTitle("");
     setNewContent("");
-    setSelectedRepoId(null); // resetează dropdown-ul
+    setSelectedRepoId(null);
     fetchNotes();
   };
 
-  // Delete note
   const deleteNote = async (id) => {
     try {
       await API.delete(`/notes/${id}`);
@@ -65,21 +63,20 @@ export default function Dashboard() {
     }
   };
 
-  // Start editing note
   const startEditing = (note) => {
     setEditingId(note.id);
     setEditingTitle(note.title);
     setEditingContent(note.content);
+    setEditingRepoId(note.repoId || ""); // repo asociat
   };
 
-  // Cancel editing
   const cancelEditing = () => {
     setEditingId(null);
     setEditingTitle("");
     setEditingContent("");
+    setEditingRepoId(null);
   };
 
-  // Save edited note
   const saveEditing = async (id) => {
     if (!editingTitle || !editingContent) {
       return alert("Titlu și conținut necesare");
@@ -88,6 +85,7 @@ export default function Dashboard() {
       await API.put(`/notes/${id}`, {
         title: editingTitle,
         content: editingContent,
+        repoId: editingRepoId || null,
       });
       cancelEditing();
       fetchNotes();
@@ -103,7 +101,7 @@ export default function Dashboard() {
 
   return (
     <div className='p-6 max-w-xl mx-auto'>
-      {/* Add new Repo  */}
+      {/* Add new Repo */}
       <div className='flex mb-4 space-x-2'>
         <input
           type='text'
@@ -165,58 +163,81 @@ export default function Dashboard() {
 
       {/* Notes list */}
       <ul>
-        {notes.map((note) => (
-          <li key={note.id} className='flex items-center justify-between mb-2'>
-            {editingId === note.id ? (
-              <div className='flex flex-grow items-center space-x-2'>
-                <input
-                  type='text'
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                  className='border px-2 py-1 flex-1 rounded'
-                />
-                <input
-                  type='text'
-                  value={editingContent}
-                  onChange={(e) => setEditingContent(e.target.value)}
-                  className='border px-2 py-1 flex-2 rounded'
-                />
-                <button
-                  onClick={() => saveEditing(note.id)}
-                  className='bg-green-500 text-white px-2 rounded hover:bg-green-600'
-                >
-                  Save
-                </button>
-                <button
-                  onClick={cancelEditing}
-                  className='bg-gray-300 px-2 rounded hover:bg-gray-400'
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className='flex-grow'>
-                  <strong>{note.title}</strong>: {note.content}
-                </div>
-                <div className='space-x-2'>
-                  <button
-                    onClick={() => startEditing(note)}
-                    className='text-yellow-500 hover:text-yellow-700'
+        {notes.map((note) => {
+          const repoName = note.repo?.name || ""; // presupunem că backend trimite repo inclus
+          return (
+            <li
+              key={note.id}
+              className='flex items-center justify-between mb-2'
+            >
+              {editingId === note.id ? (
+                <div className='flex flex-grow items-center space-x-2'>
+                  <input
+                    type='text'
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    className='border px-2 py-1 flex-1 rounded'
+                  />
+                  <input
+                    type='text'
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    className='border px-2 py-1 flex-2 rounded'
+                  />
+                  <select
+                    value={editingRepoId || ""}
+                    onChange={(e) => setEditingRepoId(Number(e.target.value))}
+                    className='border px-2 py-1 rounded'
                   >
-                    Edit
+                    <option value=''>Selectează tema GitHub</option>
+                    {repos.map((repo) => (
+                      <option key={repo.id} value={repo.id}>
+                        {repo.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => saveEditing(note.id)}
+                    className='bg-green-500 text-white px-2 rounded hover:bg-green-600'
+                  >
+                    Save
                   </button>
                   <button
-                    onClick={() => deleteNote(note.id)}
-                    className='text-red-500 hover:text-red-700'
+                    onClick={cancelEditing}
+                    className='bg-gray-300 px-2 rounded hover:bg-gray-400'
                   >
-                    Delete
+                    Cancel
                   </button>
                 </div>
-              </>
-            )}
-          </li>
-        ))}
+              ) : (
+                <>
+                  <div className='flex-grow'>
+                    <strong>{note.title}</strong>: {note.content}{" "}
+                    {repoName && (
+                      <span className='text-sm text-gray-500'>
+                        ({repoName})
+                      </span>
+                    )}
+                  </div>
+                  <div className='space-x-2'>
+                    <button
+                      onClick={() => startEditing(note)}
+                      className='text-yellow-500 hover:text-yellow-700'
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteNote(note.id)}
+                      className='text-red-500 hover:text-red-700'
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
