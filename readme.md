@@ -7,6 +7,7 @@ cu integrare GitHub. Utilizatorii se pot autentifica, pot adauga repository-uri 
 ## Tehnologii utilizate
 
 Backend:
+
 - Node.js
 - Express.js
 - Prisma ORM
@@ -15,6 +16,7 @@ Backend:
 - bcrypt
 
 Frontend:
+
 - React.js
 - Axios
 - Tailwind CSS
@@ -29,38 +31,62 @@ Frontend:
 ### Backend Setup
 
 1. Navigheaza in folderul backend:
-cd backend
+   cd backend
 
 2. Instaleaza dependentele:
-npm install
+   npm install
 
 3. Creeaza fisierul .env in folderul backend, la nivel de root:
-DATABASE_URL="file:./prisma/dev.db"
-JWT_SECRET="supersecret"
+   DATABASE_URL="file:./prisma/dev.db"
+   JWT_SECRET="supersecret"
 
 4. Initializeaza baza de date:
-npx prisma migrate dev --name init
+   npx prisma migrate dev --name init
 
 5. Genereaza Prisma Client:
-npx prisma generate
+   npx prisma generate
 
 6. Porneste serverul backend:
-npm start
+   npm start
 
 Backend-ul va rula pe http://localhost:5001
 
 ### Frontend Setup
 
 1. Navigheaza in folderul frontend:
-cd frontend
+   cd frontend
 
 2. Instaleaza dependentele:
-npm install
+   npm install
 
 3. Porneste aplicatia frontend:
-npm run dev
+   npm run dev
 
 Frontend-ul va rula pe http://localhost:5173
+
+## Vizualizarea bazei de date SQLite (UI)
+
+Pentru a vizualiza si inspecta datele din baza de date SQLite:
+
+1. Instaleaza SQLite Studio:
+   https://sqlitestudio.pl/
+
+2. Deschide SQLite Studio
+
+3. Click pe:
+   Database -> Add a database
+
+4. Selecteaza fisierul:
+   backend/dev.db
+
+5. Dupa deschidere, poti vedea tabelele:
+
+- User
+- GitHubRepo
+- Note
+
+Aceasta interfata este folosita doar pentru inspectare/debug,
+nu este necesara pentru rularea aplicatiei.
 
 ## Functionalitati
 
