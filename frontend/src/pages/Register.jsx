@@ -12,7 +12,7 @@ function Register() {
     e.preventDefault();
     try {
       await API.post("/auth/register", { email, password });
-      alert("✅ Contul a fost creat cu succes! Te redirecționăm către login.");
+      alert("✅ Contul a fost creat cu succes! Redirect catre login.");
       navigate("/login");
     } catch (err) {
       alert(err.response?.data?.message || "Register failed");

@@ -229,7 +229,7 @@ export default function Dashboard() {
           onChange={(e) => setSelectedRepoId(Number(e.target.value))}
           className='border px-2 py-1 rounded'
         >
-          <option value=''>Selectează tema GitHub</option>
+          <option value=''>Selecteaza tema GitHub</option>
           {repos.map((repo) => (
             <option key={repo.id} value={repo.id}>
               {repo.name}
@@ -271,7 +271,7 @@ export default function Dashboard() {
                     onChange={(e) => setEditingRepoId(Number(e.target.value))}
                     className='border px-2 py-1 rounded'
                   >
-                    <option value=''>Selectează tema GitHub</option>
+                    <option value=''>Selecteaza tema GitHub</option>
                     {repos.map((repo) => (
                       <option key={repo.id} value={repo.id}>
                         {repo.name}
