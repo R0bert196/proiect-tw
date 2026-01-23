@@ -64,29 +64,17 @@ Backend-ul va rula pe http://localhost:5001
 
 Frontend-ul va rula pe http://localhost:5173
 
-## Vizualizarea bazei de date SQLite (UI)
+## Prisma Studio (UI pentru baza de date)
 
-Pentru a vizualiza si inspecta datele din baza de date SQLite:
+Pentru a vizualiza si gestiona datele din baza de date folosind Prisma:
 
-1. Instaleaza SQLite Studio:
-   https://sqlitestudio.pl/
+1. Navigheaza in folderul backend:
+   cd backend
 
-2. Deschide SQLite Studio
+2. Porneste Prisma Studio:
+   npx prisma studio
 
-3. Click pe:
-   Database -> Add a database
-
-4. Selecteaza fisierul:
-   backend/dev.db
-
-5. Dupa deschidere, poti vedea tabelele:
-
-- User
-- GitHubRepo
-- Note
-
-Aceasta interfata este folosita doar pentru inspectare/debug,
-nu este necesara pentru rularea aplicatiei.
+3. Prisma Studio va porni localhost, portul fiind afisat in terminal
 
 ## Functionalitati
 
